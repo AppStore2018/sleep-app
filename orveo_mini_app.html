@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Orveo | Предиктивный ассистент сна</title>
+
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              900: '#4c1d95',
+            },
+            calm: {
+              green: '#10b981',
+              amber: '#f59e0b',
+              purple: '#8b5cf6',
+              rose: '#f43f5e'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Плавные анимации и фиксы мобильного скролла */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: pan-y;
+      background-color: var(--tg-theme-bg-color, #0f172a);
+      color: var(--tg-theme-text-color, #f8fafc);
+    }
+    .circular-progress {
+      transition: stroke-dashoffset 0.8s ease, stroke 0.5s ease;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between font-sans antialiased text-slate-100 bg-slate-950">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="px-5 pt-4 pb-3 flex items-center justify-between border-b border-slate-800/80 sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-xl shadow-lg shadow-brand-500/20">
+        🌙
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 id="headerChildName" class="font-bold text-base tracking-tight text-white">Малыш</h1>
+          <span id="headerAgeBadge" class="text-[11px] font-semibold bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded-full border border-brand-500/30">
+            ...
+          </span>
+        </div>
+        <p id="headerStatusSubtitle" class="text-xs text-slate-400">Синхронизация биоритмов...</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="openPaywallModal()" class="flex items-center gap-1 text-xs font-semibold bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-3 py-1.5 rounded-full shadow-md active:scale-95 transition">
+        <span>✨ PRO</span>
+      </button>
+      <button onclick="openSettingsModal()" class="w-9 h-9 rounded-full bg-slate-800/80 hover:bg-slate-700 flex items-center justify-center text-slate-300 active:scale-90 transition">
+        ⚙️
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 px-4 py-4 overflow-y-auto space-y-4 max-w-md mx-auto w-full pb-24">
+
+    <!-- КАРТОЧКА ПРЕДИКТИВНОГО ТАЙМЕРА (HERO WIDGET) -->
+    <div class="glass-card rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden">
+      <!-- Фоновые декоративные сферы -->
+      <div class="absolute -top-12 -left-12 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Бейдж текущего состояния -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4" id="statusBadgeContainer">
+        <span class="w-2 h-2 rounded-full animate-ping" id="statusDot"></span>
+        <span id="statusBadgeText">Расчет биоритмов Orveo...</span>
+      </div>
+
+      <!-- Круговой индикатор таймера SweetSpot -->
+      <div class="relative w-56 h-56 mx-auto my-2 flex items-center justify-center">
+        <svg class="w-full h-full" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="82" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-800/60" />
+          <circle id="progressCircle" cx="100" cy="100" r="82" stroke="currentColor" stroke-width="12" stroke-linecap="round" fill="transparent"
+                  stroke-dasharray="515.2" stroke-dashoffset="515.2"
+                  class="circular-progress text-brand-500" />
+        </svg>
+
+        <div class="absolute inset-0 flex flex-col items-center justify-center px-4">
+          <span id="timerSubtext" class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">До окна сна</span>
+          <span id="timerCountdown" class="text-3xl font-extrabold tracking-tight text-white font-mono">00:00:00</span>
+          <span id="timerWindowRange" class="text-xs text-brand-300 font-medium mt-1">Окно: --:-- — --:--</span>
+        </div>
+      </div>
+
+      <!-- Рекомендация родителям -->
+      <div id="recommendationBox" class="mt-4 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 leading-relaxed text-left flex items-start gap-2.5">
+        <span class="text-base leading-none">💡</span>
+        <span id="recommendationText">Загрузка рекомендаций Orveo...</span>
+      </div>
+
+      <!-- ГЛАВНАЯ КНОПКА ФИКСАЦИИ СОБЫТИЯ (1 КЛИК) -->
+      <div class="mt-6 space-y-2">
+        <button id="mainActionButton" onclick="toggleSleepState()"
+                class="w-full py-4 px-6 rounded-2xl font-bold text-base text-white shadow-xl flex items-center justify-center gap-3 transition transform active:scale-95 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-600/30">
+          <span id="mainActionIcon" class="text-xl">💤</span>
+          <span id="mainActionLabel">Малыш уснул</span>
+        </button>
+        <button onclick="openAdjustTimeModal()" class="text-[11px] text-slate-400 hover:text-slate-200 underline underline-offset-4 decoration-slate-700">
+          Забыли нажать вовремя? Скорректировать время
+        </button>
+      </div>
+    </div>
+
+    <!-- ДАШБОРД ДНЯ -->
+    <div class="grid grid-cols-3 gap-2.5">
+      <div class="glass-card rounded-2xl p-3 text-center">
+        <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-1">Снов сегодня</span>
+        <span id="metricNapsCount" class="text-lg font-bold text-white">0</span>
+        <span id="metricTargetNaps" class="text-[10px] text-slate-500 block">из 3</span>
+      </div>
+      <div class="glass-card rounded-2xl p-3 text-center">
+        <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-1">Суммарный сон</span>
+        <span id="metricTotalSleep" class="text-lg font-bold text-white">0ч 0м</span>
+        <span class="text-[10px] text-slate-500 block">днем</span>
+      </div>
+      <div class="glass-card rounded-2xl p-3 text-center">
+        <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-1">Ср. окно ВБ</span>
+        <span id="metricAvgWake" class="text-lg font-bold text-brand-300">-- м</span>
+        <span class="text-[10px] text-slate-500 block">факт</span>
+      </div>
+    </div>
+
+    <!-- ЖУРНАЛ СЕГОДНЯШНИХ СНОВ -->
+    <div class="glass-card rounded-3xl p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+          <span>📋</span> События дня в Orveo
+        </h3>
+        <span class="text-[11px] text-slate-500" id="currentDateLabel">Сегодня</span>
+      </div>
+      <div id="sleepLogsList" class="space-y-2">
+        <!-- Записи -->
+      </div>
+    </div>
+
+    <!-- БАННЕР ПРЕДУПРЕЖДЕНИЯ КОРТИЗОЛОВОГО СКАЧКА -->
+    <div class="rounded-2xl p-4 bg-gradient-to-r from-purple-950/60 to-slate-900 border border-brand-500/20 flex items-center justify-between gap-3">
+      <div class="space-y-1">
+        <p class="text-xs font-semibold text-brand-200">Математическая модель Orveo SweetSpot™</p>
+        <p class="text-[11px] text-slate-400 leading-normal">
+          Алгоритм адаптирует окно с учетом <span id="explainPrevNap">последнего сна</span> и предотвращает переутомление малыша.
+        </p>
+      </div>
+      <span class="text-2xl">🧠</span>
+    </div>
+
+  </main>
+
+  <!-- ==================== ONBOARDING MODAL ==================== -->
+  <div id="onboardingModal" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+      <div class="text-center space-y-1">
+        <div class="w-14 h-14 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center text-3xl mx-auto mb-2">
+          👶
+        </div>
+        <h2 class="text-xl font-bold text-white">Добро пожаловать в Orveo</h2>
+        <p class="text-xs text-slate-400">Введите данные малыша для калибровки алгоритма сна</p>
+      </div>
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Имя малыша</label>
+          <input type="text" id="inputName" placeholder="например, Артём"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Дата рождения</label>
+          <input type="date" id="inputBirthDate"
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Целевое число дневных снов</label>
+          <select id="inputTargetNaps" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+            <option value="4">4+ снов (0–3 мес)</option>
+            <option value="3" selected>3 сна (4–6 мес)</option>
+            <option value="2">2 сна (7–12 мес)</option>
+            <option value="1">1 сон (12–18+ мес)</option>
+          </select>
+        </div>
+      </div>
+
+      <button onclick="saveOnboardingData()"
+              class="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-600/30 active:scale-95 transition">
+        Начать расчет окон сна
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MANUAL TIME ADJUSTMENT MODAL ==================== -->
+  <div id="adjustModal" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-xs w-full space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-white text-base">Коррекция времени</h3>
+        <button onclick="closeAdjustTimeModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+      </div>
+      <p class="text-xs text-slate-400">Укажите реальное время события, если не отметили вовремя:</p>
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Фактическое время</label>
+        <input type="time" id="adjustEventTime" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500" />
+      </div>
+      <div class="flex gap-2">
+        <button onclick="submitAdjustedTime('sleep')" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white active:scale-95 transition">
+          Уснул тогда
+        </button>
+        <button onclick="submitAdjustedTime('wake')" class="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-xs font-bold text-white active:scale-95 transition">
+          Проснулся
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PAYWALL MODAL ==================== -->
+  <div id="paywallModal" class="fixed inset-0 z-50 modal-backdrop flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-start">
+        <div class="inline-block p-2 rounded-2xl bg-amber-500/20 text-amber-400 text-2xl">
+          ✨
+        </div>
+        <button onclick="closePaywallModal()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
+      </div>
+
+      <div class="space-y-1">
+        <h3 class="text-xl font-extrabold text-white">Orveo PRO-доступ</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Предотвратите вечерние истерики и регрессы сна с непрерывным прогнозированием «золотых окон» SweetSpot.
+        </p>
+      </div>
+
+      <!-- Тарифы -->
+      <div class="space-y-2 pt-2">
+        <!-- 3 месяца -->
+        <label class="relative flex items-center justify-between p-3.5 rounded-2xl border-2 border-brand-500 bg-brand-500/10 cursor-pointer">
+          <input type="radio" name="plan" value="1490" checked class="text-brand-500 focus:ring-brand-500" />
+          <div class="ml-3 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-white">3 месяца</span>
+              <span class="text-[9px] bg-brand-500 text-white font-bold px-1.5 py-0.5 rounded">ВЫГОДА 28%</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Полное закрытие регресса сна</p>
+          </div>
+          <span class="text-base font-extrabold text-brand-300">1 490 ₽</span>
+        </label>
+
+        <!-- 1 месяц -->
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-800 bg-slate-950/60 cursor-pointer">
+          <input type="radio" name="plan" value="690" class="text-brand-500 focus:ring-brand-500" />
+          <div class="ml-3 flex-1">
+            <span class="font-bold text-sm text-white">1 месяц</span>
+            <p class="text-[11px] text-slate-400">Базовый режим и привычки</p>
+          </div>
+          <span class="text-base font-bold text-slate-200">690 ₽</span>
+        </label>
+
+        <!-- 1 неделя -->
+        <label class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-800 bg-slate-950/60 cursor-pointer">
+          <input type="radio" name="plan" value="290" class="text-brand-500 focus:ring-brand-500" />
+          <div class="ml-3 flex-1">
+            <span class="font-bold text-sm text-white">1 неделя</span>
+            <p class="text-[11px] text-slate-400">Снятие острого кризиса</p>
+          </div>
+          <span class="text-base font-bold text-slate-200">290 ₽</span>
+        </label>
+      </div>
+
+      <div class="pt-2 space-y-2">
+        <button onclick="simulatePayment('sbp')"
+                class="w-full py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-lg shadow-amber-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+          <span>⚡️ Оплатить через СБП / Карту РФ</span>
+        </button>
+        <button onclick="simulatePayment('stars')"
+                class="w-full py-2.5 rounded-xl font-semibold text-xs text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 active:scale-95 transition flex items-center justify-center gap-1.5">
+          <span>⭐️ Оплатить Telegram Stars</span>
+        </button>
+      </div>
+
+      <p class="text-[10px] text-center text-slate-500">
+        Безопасная оплата. Отмена подписки в любое время в 1 клик.
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // -------------------------------------------------------------
+    // ИНИЦИАЛИЗАЦИЯ TELEGRAM WEB APP
+    // -------------------------------------------------------------
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.setHeaderColor) tg.setHeaderColor('#0f172a');
+      if (tg.setBackgroundColor) tg.setBackgroundColor('#020617');
+    }
+
+    function triggerHaptic(type = 'medium') {
+      try {
+        if (tg?.HapticFeedback) {
+          if (type === 'selection') tg.HapticFeedback.selectionChanged();
+          else tg.HapticFeedback.impactOccurred(type);
+        }
+      } catch (e) {
+        console.log('Haptic error', e);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // ТАБЛИЦА НОРМ ВРЕМЕНИ БОДРСТВОВАНИЯ (минуты)
+    // -------------------------------------------------------------
+    const AGE_NORMS = [
+      { minAgeMonths: 0,   maxAgeMonths: 1.5, baseWake: 50,  minWake: 40,  maxWake: 60,  naps: 5 },
+      { minAgeMonths: 1.5, maxAgeMonths: 3.0, baseWake: 75,  minWake: 60,  maxWake: 90,  naps: 4 },
+      { minAgeMonths: 3.0, maxAgeMonths: 4.5, baseWake: 100, minWake: 75,  maxWake: 120, naps: 3 },
+      { minAgeMonths: 4.5, maxAgeMonths: 6.0, baseWake: 135, minWake: 120, maxWake: 150, naps: 3 },
+      { minAgeMonths: 6.0, maxAgeMonths: 9.0, baseWake: 180, minWake: 150, maxWake: 210, naps: 2 },
+      { minAgeMonths: 9.0, maxAgeMonths: 12.0, baseWake: 210, minWake: 180, maxWake: 240, naps: 2 },
+      { minAgeMonths: 12.0, maxAgeMonths: 18.0, baseWake: 270, minWake: 240, maxWake: 300, naps: 1 },
+      { minAgeMonths: 18.0, maxAgeMonths: 36.0, baseWake: 330, minWake: 300, maxWake: 360, naps: 1 },
+    ];
+
+    // -------------------------------------------------------------
+    // СОСТОЯНИЕ (STATE & PERSISTENCE)
+    // -------------------------------------------------------------
+    let state = {
+      child: {
+        name: 'Артём',
+        birthDate: '2024-05-15',
+        targetNaps: 3
+      },
+      isSleeping: false,
+      lastEventTime: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
+      lastNapDurationMinutes: 60,
+      todayLogs: [],
+      proUnlocked: false
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem('orveo_state_v1');
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+        } catch (e) {
+          console.error('Ошибка загрузки данных Orveo', e);
+        }
+      } else {
+        initDefaultLogs();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem('orveo_state_v1', JSON.stringify(state));
+    }
+
+    function initDefaultLogs() {
+      const morningTime = new Date();
+      morningTime.setHours(7, 30, 0, 0);
+
+      const nap1Start = new Date(morningTime.getTime() + 110 * 60 * 1000);
+      const nap1End = new Date(nap1Start.getTime() + 60 * 60 * 1000);
+
+      state.todayLogs = [
+        {
+          id: 'log-1',
+          start: nap1Start.toISOString(),
+          end: nap1End.toISOString(),
+          durationMinutes: 60,
+          type: 'nap'
+        }
+      ];
+      state.lastEventTime = nap1End.toISOString();
+      state.lastNapDurationMinutes = 60;
+      state.isSleeping = false;
+      saveState();
+    }
+
+    // -------------------------------------------------------------
+    // АЛГОРИТМ SWEETSPOT
+    // -------------------------------------------------------------
+    function calculateChildAgeInMonths() {
+      const bDate = new Date(state.child.birthDate || '2024-05-01');
+      const now = new Date();
+      const diffMs = now - bDate;
+      const months = diffMs / (1000 * 60 * 60 * 24 * 30.4375);
+      return Math.max(0.5, months);
+    }
+
+    function getAgeNorms(months) {
+      for (let norm of AGE_NORMS) {
+        if (months >= norm.minAgeMonths && months < norm.maxAgeMonths) {
+          return norm;
+        }
+      }
+      return AGE_NORMS[AGE_NORMS.length - 1];
+    }
+
+    function calculateDynamicWakeWindow() {
+      const ageMonths = calculateChildAgeInMonths();
+      const norm = getAgeNorms(ageMonths);
+      let calculatedWindow = norm.baseWake;
+
+      const completedNaps = state.todayLogs.length;
+      if (completedNaps === 0) {
+        calculatedWindow *= 0.85;
+      } else if (completedNaps >= state.child.targetNaps) {
+        calculatedWindow *= 1.20;
+      }
+
+      const prevDur = state.lastNapDurationMinutes || 60;
+      let durationModifier = 0;
+      if (prevDur < 30) {
+        durationModifier = -20;
+      } else if (prevDur < 45) {
+        durationModifier = -10;
+      } else if (prevDur > 90) {
+        durationModifier = +10;
+      }
+
+      calculatedWindow += durationModifier;
+      calculatedWindow = Math.max(norm.minWake, Math.min(norm.maxWake, Math.round(calculatedWindow)));
+
+      return {
+        targetWakeMinutes: calculatedWindow,
+        norm: norm,
+        modifier: durationModifier
+      };
+    }
+
+    // -------------------------------------------------------------
+    // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+    // -------------------------------------------------------------
+    function updateAppUI() {
+      const ageMonths = calculateChildAgeInMonths();
+      const ageText = ageMonths < 12 
+        ? `${Math.floor(ageMonths)} мес.` 
+        : `${(ageMonths / 12).toFixed(1)} г.`;
+
+      document.getElementById('headerChildName').innerText = state.child.name || 'Малыш';
+      document.getElementById('headerAgeBadge').innerText = ageText;
+
+      const lastEvent = new Date(state.lastEventTime);
+      const now = new Date();
+      const elapsedMinutes = Math.max(0, Math.floor((now - lastEvent) / (1000 * 60)));
+
+      if (state.isSleeping) {
+        renderSleepingState(elapsedMinutes, lastEvent);
+      } else {
+        renderAwakeState(elapsedMinutes, lastEvent);
+      }
+
+      renderMetrics();
+      renderLogsList();
+    }
+
+    function renderSleepingState(elapsedMinutes, lastEvent) {
+      document.getElementById('headerStatusSubtitle').innerText = `Спит уже ${formatHoursMinutes(elapsedMinutes)}`;
+      document.getElementById('statusBadgeContainer').className = 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+      document.getElementById('statusDot').className = 'w-2 h-2 rounded-full animate-pulse bg-indigo-400';
+      document.getElementById('statusBadgeText').innerText = 'Сон восстанавливает силы';
+
+      document.getElementById('timerSubtext').innerText = 'Малыш спит';
+      document.getElementById('timerCountdown').innerText = formatHMS(elapsedMinutes * 60);
+      document.getElementById('timerWindowRange').innerText = `Уснул в ${formatTime(lastEvent)}`;
+
+      const circle = document.getElementById('progressCircle');
+      circle.style.stroke = '#8b5cf6';
+      const maxSleepTarget = 90;
+      const progress = Math.min(1, elapsedMinutes / maxSleepTarget);
+      circle.style.strokeDashoffset = 515.2 * (1 - progress);
+
+      document.getElementById('recommendationBox').className = 'mt-4 p-3 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 text-xs text-indigo-200 text-left flex items-start gap-2.5';
+      document.getElementById('recommendationText').innerText = elapsedMinutes < 30 
+        ? 'Сейчас идет фаза быстрого сна. Orveo рекомендует сохранять тишину, чтобы малыш перешел в глубокую фазу.'
+        : 'Отличный восстановительный сон! Если малыш проснется сейчас, нервная система успела качественно отдохнуть.';
+
+      const btn = document.getElementById('mainActionButton');
+      btn.className = 'w-full py-4 px-6 rounded-2xl font-bold text-base text-white shadow-xl flex items-center justify-center gap-3 transition transform active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 shadow-orange-500/30';
+      document.getElementById('mainActionIcon').innerText = '☀️';
+      document.getElementById('mainActionLabel').innerText = 'Малыш проснулся';
+      document.getElementById('explainPrevNap').innerText = `текущего сна (${elapsedMinutes} мин)`;
+    }
+
+    function renderAwakeState(elapsedMinutes, lastEvent) {
+      const calc = calculateDynamicWakeWindow();
+      const targetWake = calc.targetWakeMinutes;
+      const remainingMinutes = targetWake - elapsedMinutes;
+
+      const targetDate = new Date(lastEvent.getTime() + targetWake * 60 * 1000);
+      const windowStartDate = new Date(targetDate.getTime() - 10 * 60 * 1000);
+      const windowEndDate = new Date(targetDate.getTime() + 10 * 60 * 1000);
+
+      document.getElementById('headerStatusSubtitle').innerText = `Бодрствует ${formatHoursMinutes(elapsedMinutes)}`;
+      document.getElementById('timerWindowRange').innerText = `Окно: ${formatTime(windowStartDate)} — ${formatTime(windowEndDate)}`;
+
+      const circle = document.getElementById('progressCircle');
+      const progress = Math.min(1, elapsedMinutes / targetWake);
+      circle.style.strokeDashoffset = 515.2 * (1 - progress);
+
+      if (remainingMinutes > 20) {
+        document.getElementById('statusBadgeContainer').className = 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+        document.getElementById('statusBadgeText').innerText = 'Активное бодрствование';
+        circle.style.stroke = '#10b981';
+
+        document.getElementById('timerSubtext').innerText = 'До золотого окна';
+        document.getElementById('timerCountdown').innerText = formatHMS(Math.max(0, remainingMinutes * 60));
+        document.getElementById('recommendationBox').className = 'mt-4 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 text-left flex items-start gap-2.5';
+        document.getElementById('recommendationText').innerText = 'Время познавательных игр и бодрствования. Orveo рассчитал оптимальный момент для перехода к ритуалу укладывания.';
+      } else if (remainingMinutes >= -5) {
+        document.getElementById('statusBadgeContainer').className = 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4 bg-purple-500/20 text-purple-300 border border-purple-500/30';
+        document.getElementById('statusDot').className = 'w-2 h-2 rounded-full animate-ping bg-purple-400';
+        document.getElementById('statusBadgeText').innerText = 'Идеальное время укладывания';
+        circle.style.stroke = '#8b5cf6';
+
+        document.getElementById('timerSubtext').innerText = 'Уложите сейчас без слез';
+        document.getElementById('timerCountdown').innerText = remainingMinutes >= 0 
+          ? `+ ${remainingMinutes} мин` 
+          : 'СЕЙЧАС';
+        document.getElementById('recommendationBox').className = 'mt-4 p-3 rounded-2xl bg-brand-950/50 border border-brand-500/40 text-xs text-brand-200 text-left flex items-start gap-2.5';
+        document.getElementById('recommendationText').innerText = 'Окно Orveo SweetSpot открыто! Приглушите свет, включите белый шум. Малыш уснет быстро и без перегула.';
+      } else {
+        document.getElementById('statusBadgeContainer').className = 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4 bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        document.getElementById('statusDot').className = 'w-2 h-2 rounded-full animate-ping bg-rose-400';
+        document.getElementById('statusBadgeText').innerText = 'Риск перегула (+ ' + Math.abs(remainingMinutes) + ' мин)';
+        circle.style.stroke = '#f43f5e';
+
+        document.getElementById('timerSubtext').innerText = 'Окно превышено';
+        document.getElementById('timerCountdown').innerText = `+${Math.abs(remainingMinutes)} мин`;
+        document.getElementById('recommendationBox').className = 'mt-4 p-3 rounded-2xl bg-rose-950/40 border border-rose-800/40 text-xs text-rose-200 text-left flex items-start gap-2.5';
+        document.getElementById('recommendationText').innerText = 'Внимание: высокий риск кортизолового скачка. Не форсируйте укладывание в кроватке, помогите расслабиться на руках.';
+      }
+
+      const btn = document.getElementById('mainActionButton');
+      btn.className = 'w-full py-4 px-6 rounded-2xl font-bold text-base text-white shadow-xl flex items-center justify-center gap-3 transition transform active:scale-95 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-600/30';
+      document.getElementById('mainActionIcon').innerText = '💤';
+      document.getElementById('mainActionLabel').innerText = 'Малыш уснул';
+      document.getElementById('explainPrevNap').innerText = `сна (${state.lastNapDurationMinutes} мин)`;
+    }
+
+    function renderMetrics() {
+      const napsCount = state.todayLogs.length;
+      document.getElementById('metricNapsCount').innerText = napsCount;
+      document.getElementById('metricTargetNaps').innerText = `из ${state.child.targetNaps || 3}`;
+
+      const totalMinutes = state.todayLogs.reduce((acc, log) => acc + (log.durationMinutes || 0), 0);
+      document.getElementById('metricTotalSleep').innerText = formatHoursMinutes(totalMinutes);
+
+      const calc = calculateDynamicWakeWindow();
+      document.getElementById('metricAvgWake').innerText = `${calc.targetWakeMinutes} м`;
+    }
+
+    function renderLogsList() {
+      const container = document.getElementById('sleepLogsList');
+      if (state.todayLogs.length === 0) {
+        container.innerHTML = `
+          <div class="py-6 text-center text-xs text-slate-500">
+            Сегодня еще нет снов. Нажмите «Малыш уснул», когда начнете укладывание.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.todayLogs.map((log, idx) => {
+        const start = new Date(log.start);
+        const end = log.end ? new Date(log.end) : null;
+        const timeRange = end 
+          ? `${formatTime(start)} — ${formatTime(end)}` 
+          : `с ${formatTime(start)} (спит)`;
+
+        return `
+          <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80 text-xs">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-sm font-semibold">
+                ${idx + 1}
+              </span>
+              <div>
+                <p class="font-bold text-slate-200">Дневной сон #${idx + 1}</p>
+                <p class="text-[11px] text-slate-400">${timeRange}</p>
+              </div>
+            </div>
+            <span class="font-semibold text-slate-300">
+              ${log.durationMinutes ? `${log.durationMinutes} мин` : 'в процессе'}
+            </span>
+          </div>
+        `;
+      }).reverse().join('');
+    }
+
+    // -------------------------------------------------------------
+    // СОБЫТИЯ И ДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЯ
+    // -------------------------------------------------------------
+    function toggleSleepState() {
+      triggerHaptic('heavy');
+      const now = new Date();
+
+      if (!state.isSleeping) {
+        state.isSleeping = true;
+        state.lastEventTime = now.toISOString();
+
+        state.todayLogs.push({
+          id: 'log-' + Date.now(),
+          start: now.toISOString(),
+          end: null,
+          durationMinutes: null,
+          type: 'nap'
+        });
+      } else {
+        state.isSleeping = false;
+        const lastLog = state.todayLogs[state.todayLogs.length - 1];
+        if (lastLog && !lastLog.end) {
+          lastLog.end = now.toISOString();
+          const duration = Math.max(5, Math.round((now - new Date(lastLog.start)) / (1000 * 60)));
+          lastLog.durationMinutes = duration;
+          state.lastNapDurationMinutes = duration;
+        }
+        state.lastEventTime = now.toISOString();
+      }
+
+      // Синхронизация с ботом Orveo на бэкенде (если подключен)
+      syncWithBackend(state.isSleeping ? 'fell_asleep' : 'woke_up');
+
+      saveState();
+      updateAppUI();
+    }
+
+    function syncWithBackend(eventType) {
+      try {
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        const uid = tgUser ? tgUser.id : null;
+        if (uid && window.BACKEND_API_URL) {
+          fetch(`${window.BACKEND_API_URL}/api/sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              telegram_id: uid,
+              event: eventType,
+              child_name: state.child.name,
+              wake_window_minutes: calculateDynamicWakeWindow().targetWakeMinutes
+            })
+          }).catch(e => console.log('Orveo sync error:', e));
+        }
+      } catch (e) {
+        console.log('Sync err', e);
+      }
+    }
+
+    function openAdjustTimeModal() {
+      triggerHaptic('selection');
+      const now = new Date();
+      document.getElementById('adjustEventTime').value = formatTimeForInput(now);
+      document.getElementById('adjustModal').classList.remove('hidden');
+    }
+
+    function closeAdjustTimeModal() {
+      document.getElementById('adjustModal').classList.add('hidden');
+    }
+
+    function submitAdjustedTime(type) {
+      triggerHaptic('medium');
+      const timeStr = document.getElementById('adjustEventTime').value;
+      if (!timeStr) return;
+
+      const [hours, mins] = timeStr.split(':').map(Number);
+      const customDate = new Date();
+      customDate.setHours(hours, mins, 0, 0);
+
+      if (type === 'sleep') {
+        state.isSleeping = true;
+        state.lastEventTime = customDate.toISOString();
+        state.todayLogs.push({
+          id: 'log-' + Date.now(),
+          start: customDate.toISOString(),
+          end: null,
+          durationMinutes: null,
+          type: 'nap'
+        });
+        syncWithBackend('fell_asleep');
+      } else {
+        state.isSleeping = false;
+        const lastLog = state.todayLogs[state.todayLogs.length - 1];
+        if (lastLog && !lastLog.end) {
+          lastLog.end = customDate.toISOString();
+          const dur = Math.max(5, Math.round((customDate - new Date(lastLog.start)) / (1000 * 60)));
+          lastLog.durationMinutes = dur;
+          state.lastNapDurationMinutes = dur;
+        }
+        state.lastEventTime = customDate.toISOString();
+        syncWithBackend('woke_up');
+      }
+
+      closeAdjustTimeModal();
+      saveState();
+      updateAppUI();
+    }
+
+    function openPaywallModal() {
+      triggerHaptic('selection');
+      document.getElementById('paywallModal').classList.remove('hidden');
+    }
+
+    function closePaywallModal() {
+      document.getElementById('paywallModal').classList.add('hidden');
+    }
+
+    function simulatePayment(gateway) {
+      triggerHaptic('heavy');
+      const selectedPlan = document.querySelector('input[name="plan"]:checked')?.value || '1490';
+      
+      if (gateway === 'stars') {
+        alert(`⭐️ Оплата Orveo PRO через Telegram Stars (${selectedPlan} ₽ эквивалент) принята!`);
+      } else {
+        alert(`⚡️ Открытие шлюза СБП / Prodamus на сумму ${selectedPlan} ₽. Тестовый платеж подтвержден!`);
+      }
+
+      state.proUnlocked = true;
+      saveState();
+      closePaywallModal();
+    }
+
+    function openSettingsModal() {
+      triggerHaptic('selection');
+      document.getElementById('inputName').value = state.child.name;
+      document.getElementById('inputBirthDate').value = state.child.birthDate;
+      document.getElementById('inputTargetNaps').value = state.child.targetNaps;
+      document.getElementById('onboardingModal').classList.remove('hidden');
+    }
+
+    function saveOnboardingData() {
+      triggerHaptic('medium');
+      const name = document.getElementById('inputName').value.trim() || 'Малыш';
+      const bDate = document.getElementById('inputBirthDate').value || '2024-05-15';
+      const naps = parseInt(document.getElementById('inputTargetNaps').value, 10) || 3;
+
+      state.child.name = name;
+      state.child.birthDate = bDate;
+      state.child.targetNaps = naps;
+
+      saveState();
+      document.getElementById('onboardingModal').classList.add('hidden');
+      updateAppUI();
+    }
+
+    // -------------------------------------------------------------
+    // ВСПОМОГАТЕЛЬНЫЕ ФОРМАТТЕРЫ
+    // -------------------------------------------------------------
+    function formatTime(dateObj) {
+      return dateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatTimeForInput(dateObj) {
+      const h = String(dateObj.getHours()).padStart(2, '0');
+      const m = String(dateObj.getMinutes()).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function formatHoursMinutes(totalMinutes) {
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      if (h === 0) return `${m}м`;
+      return `${h}ч ${m}м`;
+    }
+
+    function formatHMS(totalSeconds) {
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      return [hrs, mins, secs].map(v => String(v).padStart(2, '0')).join(':');
+    }
+
+    // -------------------------------------------------------------
+    // СТАРТ ПРИЛОЖЕНИЯ
+    // -------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+
+      const today = new Date();
+      document.getElementById('currentDateLabel').innerText = today.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+
+      if (!localStorage.getItem('orveo_state_v1')) {
+        document.getElementById('onboardingModal').classList.remove('hidden');
+      }
+
+      updateAppUI();
+
+      setInterval(() => {
+        updateAppUI();
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
