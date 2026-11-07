@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Orveo — Трекер и ориентир сна малыша</title>
+  <title>Orveo — Спокойный трекер и ориентир сна малыша</title>
 
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -15,45 +15,73 @@
 
   <style>
     /* ==========================================================================
-       ДИЗАЙН-СИСТЕМА ORVEO: ПАЛИТРА, СВЕТ И НЕОМОРФНЫЕ МАТЕРИАЛЫ
+       ДИЗАЙН-СИСТЕМА ORVEO: ТЁПЛЫЙ И МЯГКИЙ CLAYMORPHISM
        ========================================================================== */
     :root {
       /* Фоновые поверхности */
-      --bg-base: #E8EEF2;
-      --surface-card: #EDF2F5;
-      --surface-elevated: #F3F7F9;
-      --surface-sunken: #E1E8ED;
+      --bg-base: #F6F1E9;              /* Тёплый молочный */
+      --surface-card: #FFFBF5;         /* Сливочная матовая глина */
+      --surface-subtle: #F0E9DF;       /* Спокойная подложка */
+      --surface-inset: #ECE4D8;        /* Утопленная матовая поверхность */
 
       /* Типографика */
-      --text-main: #173349;
-      --text-secondary: #526776;
-      --text-tertiary: #7D91A0;
+      --text-main: #303B3A;            /* Глубокий тёплый серо-зелёный */
+      --text-secondary: #626B65;       /* Вторичный приглушённый */
+      --text-tertiary: #87928C;        /* Подписи и деликатные детали */
 
-      /* Фирменные цвета по айдентике логотипа */
-      --brand-blue: #0A5797;
-      --brand-blue-hover: #08487D;
-      --brand-cyan: #18BBA6;
-      --brand-cyan-soft: #D9F3EF;
-      --accent-amber: #AA6A22;
-      --accent-amber-soft: #FAECE0;
+      /* Цветовые акценты */
+      --brand-blue: #175D83;           /* Смягчённый фирменный синий */
+      --brand-blue-hover: #124B6B;
+      --brand-blue-soft: #E4EEF5;
 
-      /* Контуры и границы */
-      --border-subtle: rgba(255, 255, 255, 0.8);
-      --border-input: rgba(166, 181, 193, 0.65);
-      --divider-color: rgba(166, 181, 193, 0.4);
+      --accent-sage: #DDE8D8;          /* Светлый шалфей для спокойного бодрствования */
+      --accent-sage-text: #2C4D26;
 
-      /* Неоморфная система теней (свет строго сверху-слева) */
-      --shadow-raised-lg: 9px 9px 24px rgba(166, 181, 193, 0.45), -9px -9px 24px rgba(255, 255, 255, 0.88);
-      --shadow-raised-md: 6px 6px 16px rgba(166, 181, 193, 0.4), -6px -6px 16px rgba(255, 255, 255, 0.85);
-      --shadow-raised-sm: 3px 3px 8px rgba(166, 181, 193, 0.35), -3px -3px 8px rgba(255, 255, 255, 0.85);
-      --shadow-sunken: inset 2px 2px 5px rgba(166, 181, 193, 0.5), inset -2px -2px 5px rgba(255, 255, 255, 0.9);
-      --shadow-sunken-sm: inset 2px 2px 4px rgba(166, 181, 193, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.8);
-      --shadow-btn-primary: 0 8px 18px rgba(10, 87, 151, 0.28), 4px 4px 10px rgba(166, 181, 193, 0.32), -4px -4px 10px rgba(255, 255, 255, 0.85);
+      --accent-teal: #D7ECE6;          /* Мягкая бирюза */
+      --accent-teal-text: #194F45;
 
-      /* Скругления */
-      --radius-widget: 28px;
-      --radius-card: 22px;
-      --radius-control: 16px;
+      --accent-peach: #F0D6C2;         /* Персик для ориентира засыпания */
+      --accent-peach-text: #743A13;
+
+      --accent-amber: #98602C;         /* Тёплый янтарный для затянувшегося окна */
+      --accent-amber-bg: #FBEFE2;
+
+      /* Разделители и границы */
+      --border-subtle: rgba(111, 88, 61, 0.10);
+      --border-input: rgba(111, 88, 61, 0.18);
+
+      /* Система мягких теней Claymorphism (свет сверху-слева) */
+      --clay-shadow-hero:
+        0 14px 30px rgba(111, 88, 61, 0.08),
+        0 2px 6px rgba(111, 88, 61, 0.04),
+        inset 3px 3px 8px rgba(255, 255, 255, 0.95),
+        inset -3px -4px 9px rgba(187, 157, 119, 0.12);
+
+      --clay-shadow-card:
+        0 8px 20px rgba(111, 88, 61, 0.06),
+        0 1px 3px rgba(111, 88, 61, 0.03),
+        inset 2px 2px 6px rgba(255, 255, 255, 0.9),
+        inset -2px -3px 7px rgba(187, 157, 119, 0.10);
+
+      --clay-shadow-btn-primary:
+        0 10px 22px rgba(23, 93, 131, 0.28),
+        0 2px 6px rgba(23, 93, 131, 0.12),
+        inset 2px 2px 6px rgba(255, 255, 255, 0.35),
+        inset -3px -4px 8px rgba(9, 44, 63, 0.40);
+
+      --clay-shadow-btn-soft:
+        0 4px 12px rgba(111, 88, 61, 0.06),
+        inset 2px 2px 5px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 5px rgba(187, 157, 119, 0.12);
+
+      --clay-shadow-sunken:
+        inset 2px 2px 6px rgba(111, 88, 61, 0.08),
+        inset -2px -2px 6px rgba(255, 255, 255, 0.7);
+
+      /* Радиусы */
+      --radius-hero: 32px;
+      --radius-card: 24px;
+      --radius-control: 20px;
       --radius-pill: 9999px;
     }
 
@@ -95,7 +123,7 @@
        ШАПКА (HEADER)
        ========================================================================== */
     .app-header {
-      padding: 10px 16px 14px;
+      padding: 10px 18px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -103,32 +131,37 @@
       top: 0;
       z-index: 20;
       background: var(--bg-base);
-      gap: 8px;
+      gap: 12px;
     }
 
     .header-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
       flex: 1 1 auto;
     }
 
+    /* Мягкий глиняный бейдж логотипа */
     .brand-logo-badge {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
       background: var(--brand-blue);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-raised-sm);
       flex-shrink: 0;
+      box-shadow:
+        0 6px 14px rgba(23, 93, 131, 0.25),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.35),
+        inset -2px -2px 5px rgba(9, 44, 63, 0.45);
     }
 
     .brand-logo-badge svg {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
+      display: block;
     }
 
     .brand-meta {
@@ -140,13 +173,13 @@
 
     .brand-title-row {
       display: flex;
-      align-items: center;
-      gap: 6px;
+      align-items: baseline;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .brand-name {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 800;
       letter-spacing: -0.02em;
       color: var(--text-main);
@@ -158,9 +191,10 @@
       font-weight: 600;
       color: var(--text-secondary);
       background: var(--surface-card);
-      padding: 2px 8px;
+      padding: 2px 10px;
       border-radius: var(--radius-pill);
-      box-shadow: var(--shadow-sunken-sm);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 2px 6px rgba(111, 88, 61, 0.04);
       white-space: nowrap;
       max-width: 150px;
       overflow: hidden;
@@ -180,14 +214,15 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       flex-shrink: 0;
     }
 
+    /* Мягкие кнопки действий шапки */
     .btn-icon-soft, .btn-subtle-pill {
       background: var(--surface-card);
       border: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-raised-sm);
+      box-shadow: var(--clay-shadow-btn-soft);
       color: var(--text-secondary);
       cursor: pointer;
       display: inline-flex;
@@ -198,15 +233,15 @@
     }
 
     .btn-icon-soft {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
     .btn-subtle-pill {
-      height: 34px;
-      padding: 0 10px;
+      height: 36px;
+      padding: 0 12px;
       border-radius: var(--radius-pill);
       font-size: 12px;
       font-weight: 700;
@@ -216,70 +251,74 @@
     }
 
     .btn-icon-soft:active, .btn-subtle-pill:active {
-      box-shadow: var(--shadow-sunken-sm);
-      transform: translateY(1px);
+      transform: translateY(1.5px);
+      box-shadow: 0 2px 6px rgba(111, 88, 61, 0.08);
     }
 
-    .btn-icon-soft:focus-visible, .btn-subtle-pill:focus-visible, button:focus-visible {
+    button:focus-visible, a:focus-visible, input:focus-visible {
       outline: 2px solid var(--brand-blue);
       outline-offset: 2px;
     }
 
     /* ==========================================================================
-       ОСНОВНОЙ КОНТЕНТ И КАРТОЧКИ
+       КОМПОЗИЦИЯ И КАРТОЧКИ
        ========================================================================== */
     .app-main {
       flex: 1;
-      padding: 4px 16px 24px;
+      padding: 4px 18px 24px;
       display: flex;
       flex-direction: column;
       gap: 18px;
     }
 
-    .soft-card {
+    .clay-card {
       background: var(--surface-card);
       border-radius: var(--radius-card);
       border: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-raised-md);
-      padding: 18px;
+      box-shadow: var(--clay-shadow-card);
+      padding: 20px;
       position: relative;
     }
 
     /* ==========================================================================
-       ГЛАВНЫЙ ВИДЖЕТ ТАЙМЕРА (HERO DIAL)
+       ГЛАВНЫЙ ВИДЖЕТ ТАЙМЕРА (ГЛАВНЫЙ CLAY-ОБЪЕКТ)
        ========================================================================== */
     .hero-widget {
-      border-radius: var(--radius-widget);
-      box-shadow: var(--shadow-raised-lg);
-      padding: 24px 18px 20px;
+      border-radius: var(--radius-hero);
+      box-shadow: var(--clay-shadow-hero);
+      padding: 24px 20px 22px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
+    /* Мягкий статус над кольцом */
     .hero-status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       padding: 6px 14px;
       border-radius: var(--radius-pill);
       background: var(--surface-card);
-      box-shadow: var(--shadow-sunken-sm);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--clay-shadow-btn-soft);
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
-      margin-bottom: 16px;
+      margin-bottom: 18px;
       max-width: 100%;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     .status-indicator-dot {
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
-      background: var(--brand-cyan);
+      background: var(--brand-blue);
       flex-shrink: 0;
-      transition: background-color 0.3s ease;
+      box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.6);
+      transition: background-color 0.25s ease;
     }
 
     .hero-status-pill span:last-child {
@@ -288,13 +327,17 @@
       text-overflow: ellipsis;
     }
 
-    .dial-plate {
-      width: 210px;
-      height: 210px;
+    /* Мягкий глиняный диск таймера */
+    .clay-dial-plate {
+      width: 220px;
+      height: 220px;
       border-radius: 50%;
       background: var(--surface-card);
-      box-shadow: var(--shadow-raised-md);
       border: 1px solid var(--border-subtle);
+      box-shadow:
+        0 10px 24px rgba(111, 88, 61, 0.08),
+        inset 3px 3px 8px rgba(255, 255, 255, 0.95),
+        inset -3px -4px 9px rgba(187, 157, 119, 0.12);
       position: relative;
       display: flex;
       align-items: center;
@@ -302,7 +345,7 @@
       margin-bottom: 18px;
     }
 
-    .dial-svg {
+    .clay-dial-svg {
       position: absolute;
       top: 0;
       left: 0;
@@ -311,39 +354,40 @@
       transform: rotate(-90deg);
     }
 
-    .dial-track-groove {
-      stroke: var(--surface-sunken);
+    .dial-track {
+      stroke: var(--surface-inset);
     }
 
     .dial-progress-arc {
       stroke: var(--brand-blue);
-      transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.8, 0.3, 1), stroke 0.3s ease;
     }
 
-    .dial-content {
+    /* Сердцевина с крупным числовым значением */
+    .dial-core {
       position: relative;
       z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 10px;
+      padding: 0 12px;
       width: 100%;
     }
 
     .dial-state-label {
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
       color: var(--text-tertiary);
       margin-bottom: 2px;
     }
 
     .dial-digits {
-      font-size: clamp(36px, 10vw, 44px);
+      font-size: clamp(38px, 10.5vw, 48px);
       font-weight: 800;
       line-height: 1.05;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       color: var(--text-main);
       font-variant-numeric: tabular-nums;
       margin: 2px 0 4px;
@@ -360,28 +404,15 @@
       max-width: 180px;
     }
 
-    .dial-guidance {
+    /* Короткая подсказка без лишней карточки */
+    .dial-hint-text {
       width: 100%;
-      padding: 12px 14px;
-      border-radius: var(--radius-control);
-      background: var(--surface-card);
-      box-shadow: var(--shadow-sunken-sm);
+      padding: 4px 6px;
       font-size: 13px;
-      line-height: 1.4;
+      line-height: 1.45;
       color: var(--text-secondary);
-      text-align: left;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .guidance-icon {
-      flex-shrink: 0;
-      width: 18px;
-      height: 18px;
-      color: var(--brand-blue);
-      margin-top: 1px;
+      text-align: center;
+      margin-bottom: 20px;
     }
 
     .hero-actions {
@@ -391,34 +422,36 @@
       gap: 10px;
     }
 
-    /* Адаптивная главная кнопка — текст гарантированно влезает */
-    .btn-primary-action {
+    /* Объёмная тактильная глиняная кнопка 56px */
+    .btn-clay-primary {
       width: 100%;
-      min-height: 54px;
+      height: 56px;
       border-radius: var(--radius-control);
       border: none;
       background: var(--brand-blue);
       color: #FFFFFF;
       font-family: inherit;
-      font-size: clamp(14px, 4.2vw, 16px);
+      font-size: clamp(15px, 4.2vw, 16px);
       font-weight: 700;
       letter-spacing: -0.01em;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 8px 16px;
-      box-shadow: var(--shadow-btn-primary);
+      gap: 10px;
+      padding: 0 16px;
+      box-shadow: var(--clay-shadow-btn-primary);
       transition: background-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
       white-space: nowrap;
-      overflow: hidden;
     }
 
-    .btn-primary-action:active {
+    .btn-clay-primary:active {
       transform: translateY(2px);
-      box-shadow: 0 4px 10px rgba(10, 87, 151, 0.35);
       background: var(--brand-blue-hover);
+      box-shadow:
+        0 4px 10px rgba(23, 93, 131, 0.22),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.25),
+        inset -2px -2px 5px rgba(9, 44, 63, 0.40);
     }
 
     .btn-secondary-link {
@@ -429,7 +462,7 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      padding: 6px 12px;
+      padding: 8px 14px;
       border-radius: var(--radius-pill);
       align-self: center;
       transition: color 0.15s ease;
@@ -441,117 +474,10 @@
     }
 
     /* ==========================================================================
-       НОВЫЙ БЛОК: ГРАФИК ФАЗ СНА И БОДРСТВОВАНИЯ С ПУНКТИРОМ ПРОГНОЗА
-       ========================================================================== */
-    .chart-card {
-      padding: 16px 18px;
-    }
-
-    .chart-header-row {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .chart-title-wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-
-    .section-title {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: -0.01em;
-      color: var(--text-main);
-    }
-
-    .chart-sub-caption {
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-
-    /* Цветовая легенда графика */
-    .chart-legend {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      padding: 6px 10px;
-      background: var(--surface-card);
-      box-shadow: var(--shadow-sunken-sm);
-      border-radius: var(--radius-control);
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .legend-bar-solid-sleep {
-      width: 14px;
-      height: 4px;
-      background: var(--brand-blue);
-      border-radius: 2px;
-    }
-
-    .legend-bar-solid-wake {
-      width: 14px;
-      height: 4px;
-      background: var(--brand-cyan);
-      border-radius: 2px;
-    }
-
-    .legend-bar-dashed {
-      width: 16px;
-      height: 0;
-      border-top: 2.5px dashed var(--brand-blue);
-    }
-
-    /* Контейнер интерактивного SVG графика */
-    .phase-chart-canvas-box {
-      width: 100%;
-      height: 125px;
-      border-radius: var(--radius-control);
-      background: var(--surface-sunken);
-      box-shadow: var(--shadow-sunken);
-      padding: 6px 4px 4px;
-      margin-top: 8px;
-      position: relative;
-    }
-
-    .phase-chart-svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      overflow: visible;
-    }
-
-    .chart-footer-note {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 10px;
-      line-height: 1.4;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .chart-footer-note strong {
-      color: var(--brand-blue);
-      font-weight: 700;
-    }
-
-    /* ==========================================================================
-       СВОДКА ЗА ДЕНЬ
+       ЕДИНАЯ СВОДКА ЗА ДЕНЬ
        ========================================================================== */
     .summary-card {
-      padding: 16px 18px;
+      padding: 16px 20px;
     }
 
     .summary-header-row {
@@ -560,7 +486,14 @@
       align-items: center;
       margin-bottom: 12px;
       padding-bottom: 8px;
-      border-bottom: 1px solid var(--divider-color);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
     }
 
     .summary-date {
@@ -592,14 +525,14 @@
       top: 15%;
       height: 70%;
       width: 1px;
-      background: var(--divider-color);
+      background: var(--border-subtle);
     }
 
     .metric-label {
       font-size: 12px;
       font-weight: 600;
       color: var(--text-secondary);
-      line-height: 1.2;
+      line-height: 1.25;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -624,7 +557,7 @@
     }
 
     /* ==========================================================================
-       ЖУРНАЛ СНОВ
+       ЖУРНАЛ СНОВ (ЧИСТЫЙ СПИСОК)
        ========================================================================== */
     .logs-header {
       display: flex;
@@ -643,7 +576,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 10px 0;
-      border-bottom: 1px solid var(--divider-color);
+      border-bottom: 1px solid var(--border-subtle);
       gap: 8px;
     }
 
@@ -659,17 +592,18 @@
     .log-item-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
       flex: 1 1 auto;
     }
 
     .log-index-badge {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: var(--surface-card);
-      box-shadow: var(--shadow-sunken-sm);
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -714,9 +648,9 @@
     .log-active-tag {
       font-size: 11px;
       font-weight: 700;
-      color: var(--brand-cyan);
-      background: var(--brand-cyan-soft);
-      padding: 2px 7px;
+      color: var(--brand-blue);
+      background: var(--brand-blue-soft);
+      padding: 2px 8px;
       border-radius: var(--radius-pill);
       flex-shrink: 0;
       white-space: nowrap;
@@ -731,10 +665,10 @@
     }
 
     /* ==========================================================================
-       КАК РАССЧИТАН ПРОГНОЗ
+       РАЗДЕЛ: КАК РАССЧИТАН ПРОГНОЗ
        ========================================================================== */
     .explain-card {
-      padding: 16px 18px;
+      padding: 16px 20px;
     }
 
     .explain-card h4 {
@@ -746,7 +680,7 @@
 
     .explain-card p {
       font-size: 13px;
-      line-height: 1.45;
+      line-height: 1.5;
       color: var(--text-secondary);
       margin-bottom: 8px;
     }
@@ -758,19 +692,19 @@
     }
 
     /* ==========================================================================
-       МОДАЛЬНЫЕ ОКНА И ФОРМЫ (ИСПРАВЛЕНА ОКАНТОВКА ПОЛЕЙ И ВМЕСТИМОСТЬ КНОПОК)
+       МОДАЛЬНЫЕ ОКНА И ФОРМЫ (ТЕПЛЫЕ МАТОВЫЕ ПАНЕЛИ)
        ========================================================================== */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(23, 51, 73, 0.45);
+      background: rgba(48, 59, 58, 0.40);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 14px;
+      padding: 16px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
@@ -785,10 +719,10 @@
       width: 100%;
       max-width: 380px;
       background: var(--surface-card);
-      border-radius: var(--radius-widget);
+      border-radius: var(--radius-hero);
       border: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-raised-lg);
-      padding: 22px 18px;
+      box-shadow: var(--clay-shadow-hero);
+      padding: 24px 20px;
       max-height: 90vh;
       overflow-y: auto;
       transform: translateY(12px);
@@ -803,11 +737,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .modal-header h3 {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.01em;
@@ -827,46 +761,31 @@
       color: var(--text-secondary);
     }
 
-    /* Чёткая окантовка и выраженный рельеф для всех инпутов, включая дату и время */
-    .input-sunken,
-    input[type="text"].input-sunken,
-    input[type="date"].input-sunken,
-    input[type="time"].input-sunken,
-    select.input-sunken {
+    /* Поля ввода в стиле спокойной глиняной формы */
+    .input-clay {
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
       width: 100%;
       height: 48px;
-      border-radius: var(--radius-control);
+      border-radius: 16px;
       border: 1.5px solid var(--border-input);
-      background-color: var(--surface-sunken);
-      box-shadow: var(--shadow-sunken);
+      background-color: #F8F3EC;
+      box-shadow: var(--clay-shadow-sunken);
       color: var(--text-main);
       font-family: inherit;
       font-size: 14px;
       font-weight: 600;
       padding: 0 14px;
       outline: none;
-      display: block;
       box-sizing: border-box;
-      transition: border-color 0.15s ease, background-color 0.15s ease;
+      transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    input[type="date"].input-sunken::-webkit-calendar-picker-indicator,
-    input[type="time"].input-sunken::-webkit-calendar-picker-indicator {
-      opacity: 0.65;
-      cursor: pointer;
-      filter: invert(20%) sepia(50%) saturate(1500%) hue-rotate(175deg) brightness(85%);
-    }
-
-    .input-sunken:focus,
-    input[type="date"].input-sunken:focus,
-    input[type="time"].input-sunken:focus,
-    select.input-sunken:focus {
+    .input-clay:focus {
       border-color: var(--brand-blue);
-      background-color: var(--surface-card);
-      box-shadow: inset 1px 1px 3px rgba(10, 87, 151, 0.3), inset -1px -1px 3px rgba(255, 255, 255, 0.8);
+      background-color: #FFFDF9;
+      box-shadow: 0 0 0 3px rgba(23, 93, 131, 0.12);
     }
 
     .input-error-msg {
@@ -876,26 +795,26 @@
       display: none;
     }
 
-    .form-group.has-error .input-sunken {
+    .form-group.has-error .input-clay {
       border-color: var(--accent-amber);
+      background-color: var(--accent-amber-bg);
     }
 
     .form-group.has-error .input-error-msg {
       display: block;
     }
 
-    /* Кнопки в модалках — гарантированно адаптируются под ширину экрана */
     .modal-btn-row {
       display: flex;
       gap: 10px;
-      margin-top: 16px;
+      margin-top: 18px;
     }
 
     .modal-btn-item {
       flex: 1 1 0;
       min-width: 0;
       min-height: 48px;
-      padding: 8px 10px;
+      padding: 8px 12px;
       font-size: 13px;
       font-weight: 700;
       display: flex;
@@ -905,6 +824,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      border-radius: 16px;
     }
 
     /* Тарифы подписки */
@@ -912,20 +832,20 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin: 14px 0;
+      margin: 16px 0;
     }
 
     .plan-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 11px 12px;
-      border-radius: var(--radius-control);
+      padding: 12px 14px;
+      border-radius: 18px;
       background: var(--surface-card);
       border: 1.5px solid var(--border-subtle);
-      box-shadow: var(--shadow-raised-sm);
+      box-shadow: var(--clay-shadow-btn-soft);
       cursor: pointer;
-      gap: 8px;
+      gap: 10px;
       transition: all 0.15s ease;
     }
 
@@ -935,27 +855,22 @@
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: var(--surface-card);
-      box-shadow: var(--shadow-sunken-sm);
+      background: var(--surface-subtle);
+      border: 1.5px solid var(--border-input);
       position: relative;
       cursor: pointer;
       flex-shrink: 0;
     }
 
-    .plan-card input[type="radio"]:checked::after {
-      content: '';
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      top: 5px;
-      left: 5px;
-      border-radius: 50%;
+    .plan-card input[type="radio"]:checked {
+      border-color: var(--brand-blue);
       background: var(--brand-blue);
+      box-shadow: inset 0 0 0 3px #FFFBF5;
     }
 
     .plan-card.is-selected {
       border-color: var(--brand-blue);
-      box-shadow: var(--shadow-sunken-sm);
+      background: #F8F5EE;
     }
 
     .plan-info {
@@ -975,7 +890,7 @@
     }
 
     .plan-name {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text-main);
       white-space: nowrap;
@@ -985,21 +900,20 @@
       font-size: 10px;
       font-weight: 700;
       color: var(--brand-blue);
-      background: var(--surface-elevated);
-      padding: 1px 6px;
+      background: var(--brand-blue-soft);
+      padding: 1px 7px;
       border-radius: var(--radius-pill);
-      box-shadow: var(--shadow-raised-sm);
       white-space: nowrap;
     }
 
     .plan-desc {
       font-size: 11px;
       color: var(--text-secondary);
-      line-height: 1.25;
+      line-height: 1.3;
     }
 
     .plan-price {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 800;
       color: var(--text-main);
       font-variant-numeric: tabular-nums;
@@ -1016,7 +930,6 @@
     .paywall-action-btn {
       width: 100%;
       min-height: 48px;
-      height: auto;
       padding: 10px 14px;
       font-size: 13px;
       font-weight: 700;
@@ -1024,13 +937,13 @@
       text-align: center;
       white-space: normal;
       word-break: break-word;
-      border-radius: var(--radius-control);
+      border-radius: 16px;
     }
 
     .privacy-notice {
       font-size: 11px;
       color: var(--text-tertiary);
-      line-height: 1.4;
+      line-height: 1.45;
       text-align: center;
       margin-top: 14px;
     }
@@ -1049,7 +962,7 @@
     <!-- ==================== ШАПКА ==================== -->
     <header class="app-header">
       <div class="header-brand">
-        <!-- Векторный логотип Orveo -->
+        <!-- Компактный векторный знак Orveo из оригинального логотипа -->
         <div class="brand-logo-badge" aria-hidden="true">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -1060,6 +973,7 @@
               </linearGradient>
               <mask id="orveoRingMask">
                 <rect width="100" height="100" fill="white" />
+                <!-- Асимметричное смещение внутреннего выреза по пропорциям логотипа -->
                 <circle cx="55.3" cy="43.8" r="29.6" fill="black" />
               </mask>
             </defs>
@@ -1080,7 +994,7 @@
         <button type="button" onclick="openPaywallModal()" class="btn-subtle-pill" aria-label="Параметры доступа">
           Подписка
         </button>
-        <button type="button" onclick="openSettingsModal()" class="btn-icon-soft" aria-label="Настройки профиля ребёнка">
+        <button type="button" onclick="openSettingsModal()" class="btn-icon-soft" aria-label="Настройки профиля малыша">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -1092,43 +1006,38 @@
     <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
     <main class="app-main">
 
-      <!-- ГЛАВНЫЙ ВИДЖЕТ ТАЙМЕРА (С ТОЧНЫМИ СЕКУНДАМИ) -->
-      <section class="soft-card hero-widget" aria-label="Текущее состояние и таймер">
+      <!-- ГЛАВНЫЙ ВИДЖЕТ ТАЙМЕРА (МЯГКАЯ ГЛИНЯНАЯ ФОРМА) -->
+      <section class="clay-card hero-widget" aria-label="Текущее состояние и таймер">
         <div class="hero-status-pill" id="statusPill">
           <span class="status-indicator-dot" id="statusDot"></span>
           <span id="statusBadgeText">Расчёт ориентиров...</span>
         </div>
 
-        <!-- Тактильный циферблат -->
-        <div class="dial-plate">
-          <svg class="dial-svg" viewBox="0 0 200 200" aria-hidden="true">
-            <circle cx="100" cy="100" r="78" stroke-width="11" fill="none" class="dial-track-groove" />
-            <circle id="progressCircle" cx="100" cy="100" r="78" stroke-width="11" stroke-linecap="round" fill="none"
-                    stroke-dasharray="490.09" stroke-dashoffset="490.09"
+        <!-- Круговой таймер Orveo -->
+        <div class="clay-dial-plate">
+          <svg class="clay-dial-svg" viewBox="0 0 200 200" aria-hidden="true">
+            <circle cx="100" cy="100" r="80" stroke-width="12" fill="none" class="dial-track" />
+            <!-- Длина окружности 2 * pi * 80 = 502.65 -->
+            <circle id="progressCircle" cx="100" cy="100" r="80" stroke-width="12" stroke-linecap="round" fill="none"
+                    stroke-dasharray="502.65" stroke-dashoffset="502.65"
                     class="dial-progress-arc" />
           </svg>
 
-          <div class="dial-content">
+          <div class="dial-core">
             <span id="timerSubtext" class="dial-state-label">Бодрствует</span>
-            <!-- Таймер обратного отсчета с непрерывными секундами ЧЧ:ММ:СС -->
             <span id="timerCountdown" class="dial-digits">00:00:00</span>
-            <span id="timerWindowRange" class="dial-sub-info">Окно сна: --:--</span>
+            <span id="timerWindowRange" class="dial-sub-info">Ориентир сна: --:--</span>
           </div>
         </div>
 
-        <!-- Подсказка -->
-        <div class="dial-guidance">
-          <svg class="guidance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-          <span id="recommendationText">Определяем ориентировочный интервал сна...</span>
-        </div>
+        <!-- Короткая подсказка прямо на поверхности виджета -->
+        <p class="dial-hint-text" id="recommendationText">
+          Определяем ориентировочный интервал сна...
+        </p>
 
-        <!-- Главные действия -->
+        <!-- Кнопки управления -->
         <div class="hero-actions">
-          <button type="button" id="mainActionButton" onclick="toggleSleepState()" class="btn-primary-action">
+          <button type="button" id="mainActionButton" onclick="toggleSleepState()" class="btn-clay-primary">
             <span id="mainActionIcon">💤</span>
             <span id="mainActionLabel">Малыш уснул</span>
           </button>
@@ -1138,36 +1047,8 @@
         </div>
       </section>
 
-      <!-- НОВЫЙ БЛОК: ГРАФИК ФАЗ СНА И БОДРСТВОВАНИЯ (С ПОЛНОЙ ЛИНИЕЙ И ПУНКТИРОМ ПРОГНОЗА) -->
-      <section class="soft-card chart-card" aria-label="Суточный график фаз">
-        <div class="chart-header-row">
-          <div class="chart-title-wrap">
-            <h2 class="section-title">График фаз дня</h2>
-            <span class="chart-sub-caption">Суточный цикл</span>
-          </div>
-
-          <!-- Цветовой код -->
-          <div class="chart-legend">
-            <span class="legend-item"><span class="legend-bar-solid-sleep"></span>Сон (факт)</span>
-            <span class="legend-item"><span class="legend-bar-solid-wake"></span>Бодрств.</span>
-            <span class="legend-item"><span class="legend-bar-dashed"></span>Ориентир укладывания</span>
-          </div>
-        </div>
-
-        <!-- SVG-холст графика -->
-        <div class="phase-chart-canvas-box">
-          <svg id="phaseChartSvg" class="phase-chart-svg" viewBox="0 0 340 115" preserveAspectRatio="none">
-            <!-- Динамически заполняется функцией renderPhaseChart() -->
-          </svg>
-        </div>
-
-        <div class="chart-footer-note" id="chartForecastCaption">
-          Расчёт следующего укладывания обновляется по данным дня.
-        </div>
-      </section>
-
       <!-- ЕДИНАЯ СВОДКА ЗА ДЕНЬ -->
-      <section class="soft-card summary-card" aria-label="Сводка за день">
+      <section class="clay-card summary-card" aria-label="Сводка за день">
         <div class="summary-header-row">
           <h2 class="section-title">Сводка за сегодня</h2>
           <span class="summary-date" id="currentDateLabel">Сегодня</span>
@@ -1184,7 +1065,7 @@
             <span class="metric-sub">днём</span>
           </div>
           <div class="metric-col">
-            <span class="metric-label">Ориентир ВБ</span>
+            <span class="metric-label">Ориентир бодрствования</span>
             <span id="metricAvgWake" class="metric-val">--</span>
             <span class="metric-sub">текущее окно</span>
           </div>
@@ -1192,23 +1073,23 @@
       </section>
 
       <!-- ЖУРНАЛ СЕГОДНЯШНИХ СНОВ -->
-      <section class="soft-card" aria-label="Журнал сна">
+      <section class="clay-card" aria-label="Журнал сна">
         <div class="logs-header">
           <h2 class="section-title">Записи за сегодня</h2>
         </div>
         <div id="sleepLogsList" class="logs-list">
-          <!-- Генерируется через JS -->
+          <!-- Заполняется динамически через JS -->
         </div>
       </section>
 
       <!-- РАЗДЕЛ «КАК РАССЧИТАН ПРОГНОЗ» -->
-      <section class="soft-card explain-card" aria-label="Объяснение алгоритма прогноза">
+      <section class="clay-card explain-card" aria-label="Объяснение алгоритма прогноза">
         <h4>Как рассчитан прогноз</h4>
         <p>
           Ориентир следующего сна строится на основе возраста малыша, времени пробуждения и длительности <span id="explainPrevNap">предыдущего сна</span>.
         </p>
         <p>
-          Первое утреннее окно обычно короче, а окно перед ночью — длиннее. Пунктир на графике показывает время, когда малыша стоит начать укладывать, чтобы избежать переутомления.
+          Первое утреннее окно обычно короче, а окно перед ночным сном — длиннее. Расчёт ориентировочный: всегда сверяйте его с реальным поведением и признаками усталости малыша.
         </p>
       </section>
 
@@ -1226,20 +1107,19 @@
       <form id="childSettingsForm" onsubmit="event.preventDefault(); saveOnboardingData();">
         <div class="form-group" id="groupInputName">
           <label class="form-label" for="inputName">Имя малыша</label>
-          <input type="text" id="inputName" class="input-sunken" placeholder="например, Артём" required />
+          <input type="text" id="inputName" class="input-clay" placeholder="например, Артём" required />
           <span class="input-error-msg">Пожалуйста, укажите имя</span>
         </div>
 
-        <!-- Поле с чёткой окантовкой -->
         <div class="form-group" id="groupInputBirthDate">
           <label class="form-label" for="inputBirthDate">Дата рождения</label>
-          <input type="date" id="inputBirthDate" class="input-sunken" required />
-          <span class="input-error-msg">Пожалуйста, выберите дату рождения</span>
+          <input type="date" id="inputBirthDate" class="input-clay" required />
+          <span class="input-error-msg">Пожалуйста, укажите дату рождения</span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="inputTargetNaps">Целевое количество дневных снов</label>
-          <select id="inputTargetNaps" class="input-sunken">
+          <select id="inputTargetNaps" class="input-clay">
             <option value="4">4+ снов (0–3 мес)</option>
             <option value="3" selected>3 сна (4–6 мес)</option>
             <option value="2">2 сна (7–12 мес)</option>
@@ -1247,21 +1127,20 @@
           </select>
         </div>
 
-        <!-- Поле утреннего подъёма с чёткой окантовкой -->
         <div class="form-group" id="groupInputMorningWake">
           <label class="form-label" for="inputMorningWake">Утренний подъём сегодня</label>
-          <input type="time" id="inputMorningWake" value="07:30" class="input-sunken" required />
+          <input type="time" id="inputMorningWake" value="07:30" class="input-clay" required />
           <span class="input-error-msg">Пожалуйста, укажите время подъёма</span>
         </div>
 
         <div style="margin-top: 18px;">
-          <button type="submit" class="btn-primary-action" style="min-height: 48px; width: 100%;">
+          <button type="submit" class="btn-clay-primary" style="height: 50px;">
             Сохранить данные
           </button>
         </div>
 
         <p class="privacy-notice">
-          Конфиденциальность: все данные хранятся исключительно на вашем устройстве в локальном хранилище Telegram.
+          Все данные сохраняются локально в вашем приложении Telegram и не передаются на сторонние серверы.
         </p>
       </form>
     </div>
@@ -1276,20 +1155,19 @@
       </div>
 
       <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
-        Укажите фактическое время, если событие произошло раньше:
+        Укажите реальное время события, если не удалось отметить вовремя:
       </p>
 
       <div class="form-group">
         <label class="form-label" for="adjustEventTime">Фактическое время события</label>
-        <input type="time" id="adjustEventTime" class="input-sunken" />
+        <input type="time" id="adjustEventTime" class="input-clay" />
       </div>
 
-      <!-- Кнопки с адаптивной вместимостью текста -->
       <div class="modal-btn-row">
-        <button type="button" onclick="submitAdjustedTime('sleep')" class="btn-primary-action modal-btn-item">
+        <button type="button" onclick="submitAdjustedTime('sleep')" class="btn-clay-primary modal-btn-item">
           Уснул тогда
         </button>
-        <button type="button" onclick="submitAdjustedTime('wake')" class="btn-icon-soft modal-btn-item" style="border-radius: var(--radius-control); color: var(--brand-blue);">
+        <button type="button" onclick="submitAdjustedTime('wake')" class="btn-icon-soft modal-btn-item" style="color: var(--brand-blue);">
           Проснулся
         </button>
       </div>
@@ -1305,7 +1183,7 @@
       </div>
 
       <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.45;">
-        Выберите подходящий срок доступа для непрерывного расчёта графика сна малыша:
+        Выберите срок доступа для непрерывного расчёта ориентиров сна малыша:
       </p>
 
       <div class="plans-list">
@@ -1341,7 +1219,7 @@
       </div>
 
       <div class="paywall-actions">
-        <button type="button" onclick="simulatePayment('sbp')" class="btn-primary-action paywall-action-btn">
+        <button type="button" onclick="simulatePayment('sbp')" class="btn-clay-primary paywall-action-btn">
           Тестовая оплата: СБП / Карта
         </button>
         <button type="button" onclick="simulatePayment('stars')" class="btn-icon-soft paywall-action-btn" style="color: var(--brand-blue);">
@@ -1363,8 +1241,9 @@
     if (tg) {
       tg.ready();
       tg.expand();
-      if (tg.setHeaderColor) tg.setHeaderColor('#E8EEF2');
-      if (tg.setBackgroundColor) tg.setBackgroundColor('#E8EEF2');
+      // Синхронизируем системный фон и заголовок Telegram с тёплой молочной гаммой Orveo
+      if (tg.setHeaderColor) tg.setHeaderColor('#F6F1E9');
+      if (tg.setBackgroundColor) tg.setBackgroundColor('#F6F1E9');
     }
 
     function triggerHaptic(type = 'medium') {
@@ -1376,6 +1255,7 @@
       } catch (e) {}
     }
 
+    // Таблица норм времени бодрствования по возрасту (в минутах)
     const AGE_NORMS = [
       { minAgeMonths: 0,   maxAgeMonths: 1.5, baseWake: 50,  minWake: 40,  maxWake: 60,  naps: 5 },
       { minAgeMonths: 1.5, maxAgeMonths: 3.0, baseWake: 75,  minWake: 60,  maxWake: 90,  naps: 4 },
@@ -1510,7 +1390,7 @@
     }
 
     // -------------------------------------------------------------
-    // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА: С ТОЧНЫМ ПОСЕКУНДНЫМ ТАЙМЕРОМ
+    // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА: С ТОЧНЫМИ СЕКУНДАМИ И УСТОЙЧИВЫМИ СТИЛЯМИ
     // -------------------------------------------------------------
     function updateAppUI() {
       const ageMonths = calculateChildAgeInMonths();
@@ -1523,7 +1403,6 @@
       const lastEvent = new Date(state.lastEventTime);
       const now = new Date();
 
-      // Точный расчёт в секундах для плавного хода таймера
       const elapsedSeconds = Math.max(0, Math.floor((now - lastEvent) / 1000));
       const elapsedMinutes = Math.floor(elapsedSeconds / 60);
 
@@ -1535,7 +1414,6 @@
 
       renderMetrics();
       renderLogsList();
-      renderPhaseChart();
     }
 
     function renderSleepingState(elapsedSeconds, elapsedMinutes, lastEvent) {
@@ -1546,7 +1424,6 @@
       document.getElementById('statusBadgeText').innerText = 'Малыш спит';
 
       document.getElementById('timerSubtext').innerText = 'Время сна';
-      // Непрерывный секундомер сна
       document.getElementById('timerCountdown').innerText = formatHMS(elapsedSeconds);
       document.getElementById('timerWindowRange').innerText = `Уснул в ${formatTime(lastEvent)}`;
 
@@ -1554,10 +1431,10 @@
       circle.style.stroke = 'var(--brand-blue)';
       const napScaleSeconds = 90 * 60;
       const progress = Math.min(1, elapsedSeconds / napScaleSeconds);
-      circle.style.strokeDashoffset = 490.09 * (1 - progress);
+      circle.style.strokeDashoffset = 502.65 * (1 - progress);
 
       document.getElementById('recommendationText').innerText = elapsedMinutes < 30
-        ? 'Идёт начальный отрезок сна. Поддерживайте тишину и полумрак в комнате.'
+        ? 'Идёт начальный отрезок сна. Поддерживайте спокойную обстановку.'
         : 'Хороший восстановительный сон. Организм ребёнка восполняет силы.';
 
       document.getElementById('mainActionIcon').innerText = '☀️';
@@ -1570,7 +1447,6 @@
       const targetWakeMinutes = calc.targetWakeMinutes;
       const targetWakeSeconds = targetWakeMinutes * 60;
       
-      // Точные оставшиеся секунды до следующего сна
       const remainingSeconds = targetWakeSeconds - elapsedSeconds;
       const remainingMinutes = Math.floor(remainingSeconds / 60);
 
@@ -1583,21 +1459,21 @@
 
       const circle = document.getElementById('progressCircle');
       const progress = Math.min(1, elapsedSeconds / targetWakeSeconds);
-      circle.style.strokeDashoffset = 490.09 * (1 - progress);
+      circle.style.strokeDashoffset = 502.65 * (1 - progress);
 
       const statusDot = document.getElementById('statusDot');
 
       if (remainingSeconds > 15 * 60) {
-        // Активное бодрствование — обратный отсчёт секунд ЧЧ:ММ:СС
-        statusDot.style.backgroundColor = 'var(--brand-cyan)';
+        // Спокойное активное бодрствование
+        statusDot.style.backgroundColor = 'var(--brand-blue)';
         document.getElementById('statusBadgeText').innerText = 'Активное бодрствование';
-        circle.style.stroke = 'var(--brand-cyan)';
+        circle.style.stroke = 'var(--brand-blue)';
 
         document.getElementById('timerSubtext').innerText = 'До следующего сна';
         document.getElementById('timerCountdown').innerText = formatHMS(remainingSeconds);
-        document.getElementById('recommendationText').innerText = 'Время общения и активности. Наблюдайте за первыми признаками усталости малыша.';
+        document.getElementById('recommendationText').innerText = 'Время для общения и развивающих игр. Наблюдайте за первыми признаками усталости.';
       } else if (remainingSeconds >= -10 * 60) {
-        // Окно сна открыто — точный отсчёт секунд до центра окна
+        // Окно сна
         statusDot.style.backgroundColor = 'var(--brand-blue)';
         document.getElementById('statusBadgeText').innerText = 'Ориентировочное время сна';
         circle.style.stroke = 'var(--brand-blue)';
@@ -1606,15 +1482,15 @@
         document.getElementById('timerCountdown').innerText = remainingSeconds >= 0 
           ? formatHMS(remainingSeconds) 
           : `+${formatHMS(Math.abs(remainingSeconds))}`;
-        document.getElementById('recommendationText').innerText = 'Оптимальный интервал для засыпания. Запустите привычный спокойный ритуал укладывания.';
+        document.getElementById('recommendationText').innerText = 'Оптимальный интервал для засыпания. Запустите привычный ритуал укладывания.';
       } else {
-        // Превышение расчётного времени — точный отсчёт секунд перегула
+        // Превышение времени: спокойная формулировка без тревоги
         const overdueSeconds = Math.abs(remainingSeconds);
         statusDot.style.backgroundColor = 'var(--accent-amber)';
         document.getElementById('statusBadgeText').innerText = `Расчётное время прошло на ${Math.floor(overdueSeconds / 60)} мин`;
         circle.style.stroke = 'var(--accent-amber)';
 
-        document.getElementById('timerSubtext').innerText = 'Превышение окна';
+        document.getElementById('timerSubtext').innerText = 'Превышение ориентира';
         document.getElementById('timerCountdown').innerText = `+${formatHMS(overdueSeconds)}`;
         document.getElementById('recommendationText').innerText = 'Окно бодрствования затянулось. Малыш может быть уставшим — помогите ему спокойно расслабиться.';
       }
@@ -1622,183 +1498,6 @@
       document.getElementById('mainActionIcon').innerText = '💤';
       document.getElementById('mainActionLabel').innerText = 'Малыш уснул';
       document.getElementById('explainPrevNap').innerText = `сна (${state.lastNapDurationMinutes} мин)`;
-    }
-
-    // -------------------------------------------------------------
-    // НОВЫЙ РЕНДЕР: ИНТЕРАКТИВНЫЙ ГРАФИК ФАЗ СНА И ПРОГНОЗА
-    // -------------------------------------------------------------
-    function renderPhaseChart() {
-      const svg = document.getElementById('phaseChartSvg');
-      if (!svg) return;
-
-      const now = new Date();
-      const [mwH, mwM] = (state.child.morningWake || '07:30').split(':').map(Number);
-      
-      let morningWakeDt = new Date(now);
-      morningWakeDt.setHours(mwH, mwM, 0, 0);
-
-      // Рассчитываем будущее расчётное окно сна
-      const calc = calculateDynamicWakeWindow();
-      const targetWakeMinutes = calc.targetWakeMinutes;
-      const lastEvent = new Date(state.lastEventTime);
-
-      let targetSleepDt, projectedWakeDt;
-      if (!state.isSleeping) {
-        targetSleepDt = new Date(lastEvent.getTime() + targetWakeMinutes * 60 * 1000);
-        projectedWakeDt = new Date(targetSleepDt.getTime() + 60 * 60 * 1000);
-      } else {
-        projectedWakeDt = new Date(lastEvent.getTime() + 60 * 60 * 1000);
-        targetSleepDt = new Date(projectedWakeDt.getTime() + targetWakeMinutes * 60 * 1000);
-      }
-
-      // Определяем диапазон графика по времени суток
-      let startHour = Math.min(mwH, 7);
-      let endHour = Math.max(21, Math.min(24, Math.ceil(projectedWakeDt.getHours() + 1.5)));
-
-      const dayStart = new Date(now);
-      dayStart.setHours(startHour, 0, 0, 0);
-
-      const dayEnd = new Date(now);
-      dayEnd.setHours(endHour, 0, 0, 0);
-
-      const totalSpanMs = Math.max(1, dayEnd.getTime() - dayStart.getTime());
-
-      // Размеры и координаты в SVG
-      const svgW = 340;
-      const svgH = 115;
-      const padL = 36;
-      const padR = 14;
-      const plotW = svgW - padL - padR;
-
-      const yWake = 26;   // Верхний уровень: бодрствование
-      const ySleep = 74;  // Нижний уровень: сон
-
-      function timeToX(dt) {
-        const diff = dt.getTime() - dayStart.getTime();
-        const ratio = Math.max(0, Math.min(1, diff / totalSpanMs));
-        return padL + ratio * plotW;
-      }
-
-      // 1. Построение сплошной линии (факт за день)
-      let solidSegments = [];
-      let currentX = timeToX(morningWakeDt);
-      let currentY = yWake;
-
-      solidSegments.push(`M ${currentX.toFixed(1)} ${currentY}`);
-
-      // Добавляем завершённые и текущие сны
-      const sortedLogs = [...state.todayLogs].sort((a, b) => new Date(a.start) - new Date(b.start));
-
-      sortedLogs.forEach(log => {
-        const sTime = new Date(log.start);
-        const eTime = log.end ? new Date(log.end) : now;
-
-        const xStart = timeToX(sTime);
-        const xEnd = timeToX(eTime);
-
-        // Линия бодрствования до начала сна
-        solidSegments.push(`L ${xStart.toFixed(1)} ${yWake}`);
-        // Переход в сон
-        solidSegments.push(`L ${xStart.toFixed(1)} ${ySleep}`);
-        // Отрезок сна
-        solidSegments.push(`L ${xEnd.toFixed(1)} ${ySleep}`);
-        
-        if (log.end) {
-          // Выход из сна в бодрствование
-          solidSegments.push(`L ${xEnd.toFixed(1)} ${yWake}`);
-          currentX = xEnd;
-          currentY = yWake;
-        } else {
-          currentX = xEnd;
-          currentY = ySleep;
-        }
-      });
-
-      // Доводим сплошную линию факта до текущего момента времени
-      const nowX = timeToX(now);
-      solidSegments.push(`L ${nowX.toFixed(1)} ${currentY}`);
-
-      // 2. Построение пунктирной линии (прогноз будущего сна)
-      let dashedSegments = [];
-      dashedSegments.push(`M ${nowX.toFixed(1)} ${currentY}`);
-
-      if (!state.isSleeping) {
-        const targetX = timeToX(targetSleepDt);
-        const projWakeX = timeToX(projectedWakeDt);
-
-        // Пунктир бодрствования до расчётного укладывания
-        dashedSegments.push(`L ${targetX.toFixed(1)} ${yWake}`);
-        // Шаг в сон
-        dashedSegments.push(`L ${targetX.toFixed(1)} ${ySleep}`);
-        // Расчётный интервал сна
-        dashedSegments.push(`L ${projWakeX.toFixed(1)} ${ySleep}`);
-        // Пробуждение
-        dashedSegments.push(`L ${projWakeX.toFixed(1)} ${yWake}`);
-      } else {
-        const projWakeX = timeToX(projectedWakeDt);
-        dashedSegments.push(`L ${projWakeX.toFixed(1)} ${ySleep}`);
-        dashedSegments.push(`L ${projWakeX.toFixed(1)} ${yWake}`);
-      }
-
-      // 3. Формирование временных меток оси X
-      let ticksHtml = '';
-      const stepHours = (endHour - startHour) > 12 ? 3 : 2;
-      for (let h = startHour; h <= endHour; h += stepHours) {
-        const tickDate = new Date(now);
-        tickDate.setHours(h, 0, 0, 0);
-        const tx = timeToX(tickDate);
-        const timeLabel = `${String(h).padStart(2, '0')}:00`;
-        ticksHtml += `
-          <line x1="${tx.toFixed(1)}" y1="${ySleep + 12}" x2="${tx.toFixed(1)}" y2="${ySleep + 16}" stroke="rgba(166,181,193,0.5)" stroke-width="1" />
-          <text x="${tx.toFixed(1)}" y="${ySleep + 27}" font-size="9" fill="#7D91A0" font-weight="600" text-anchor="middle" font-family="inherit">${timeLabel}</text>
-        `;
-      }
-
-      // Текст под графиком о времени следующего сна
-      const footerCaption = document.getElementById('chartForecastCaption');
-      if (footerCaption) {
-        if (!state.isSleeping) {
-          footerCaption.innerHTML = `Следующий сон: уложить ориентировочно в <strong>${formatTime(targetSleepDt)}</strong> (окно ${formatHoursMinutes(calc.targetWakeMinutes)})`;
-        } else {
-          footerCaption.innerHTML = `Текущий сон: ожидаемое естественное пробуждение около <strong>${formatTime(projectedWakeDt)}</strong>`;
-        }
-      }
-
-      // Итоговая сборка SVG
-      svg.innerHTML = `
-        <defs>
-          <linearGradient id="solidSleepAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0A5797" stop-opacity="0.25" />
-            <stop offset="100%" stop-color="#0A5797" stop-opacity="0.02" />
-          </linearGradient>
-          <linearGradient id="forecastSleepAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0A5797" stop-opacity="0.15" />
-            <stop offset="100%" stop-color="#0A5797" stop-opacity="0.0" />
-          </linearGradient>
-        </defs>
-
-        <!-- Направляющие линии уровней -->
-        <line x1="${padL}" y1="${yWake}" x2="${svgW - padR}" y2="${yWake}" stroke="rgba(24, 187, 166, 0.25)" stroke-width="1" stroke-dasharray="2,2" />
-        <line x1="${padL}" y1="${ySleep}" x2="${svgW - padR}" y2="${ySleep}" stroke="rgba(10, 87, 151, 0.25)" stroke-width="1" stroke-dasharray="2,2" />
-
-        <!-- Подписи уровней слева -->
-        <text x="8" y="${yWake + 4}" font-size="10" font-weight="700" fill="#18BBA6" font-family="inherit">Бодр.</text>
-        <text x="8" y="${ySleep + 4}" font-size="10" font-weight="700" fill="#0A5797" font-family="inherit">Сон</text>
-
-        <!-- СПЛОШНАЯ ЛИНИЯ (ФАКТИЧЕСКИЕ ДАННЫЕ) -->
-        <path d="${solidSegments.join(' ')}" fill="none" stroke="#0A5797" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-
-        <!-- ПУНКТИРНАЯ ЛИНИЯ (ПРОГНОЗ СЛЕДУЮЩЕГО СНА) -->
-        <path d="${dashedSegments.join(' ')}" fill="none" stroke="#0A5797" stroke-width="2.5" stroke-dasharray="5,4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85" />
-
-        <!-- Маркер «Сейчас» -->
-        <line x1="${nowX.toFixed(1)}" y1="12" x2="${nowX.toFixed(1)}" y2="${ySleep + 8}" stroke="#AA6A22" stroke-width="1.5" stroke-dasharray="2,2" />
-        <circle cx="${nowX.toFixed(1)}" cy="${currentY}" r="4" fill="#AA6A22" stroke="#FFFFFF" stroke-width="1.5" />
-        <text x="${nowX.toFixed(1)}" y="10" font-size="9" font-weight="800" fill="#AA6A22" text-anchor="middle" font-family="inherit">СЕЙЧАС</text>
-
-        <!-- Временная шкала внизу -->
-        ${ticksHtml}
-      `;
     }
 
     function renderMetrics() {
@@ -2037,7 +1736,7 @@
     function formatHMS(totalSeconds) {
       const hrs = Math.floor(totalSeconds / 3600);
       const mins = Math.floor((totalSeconds % 3600) / 60);
-      const secs = Math.floor(totalSeconds % 60);
+      const secs = totalSeconds % 60;
       return [hrs, mins, secs].map(v => String(v).padStart(2, '0')).join(':');
     }
 
@@ -2056,7 +1755,7 @@
 
       updateAppUI();
 
-      // Секундный цикл обновления таймера и графика
+      // Секундный цикл обновления таймера
       setInterval(updateAppUI, 1000);
     });
   </script>
